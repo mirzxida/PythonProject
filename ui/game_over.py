@@ -12,7 +12,9 @@ class GameOverScreen:
         font = self.big if big else self.small
         surface = font.render(text, True, color)
         rect = surface.get_rect(center = (WIDTH // 2, y))
+        self.screen.blit(surface, rect)
     def run(self, score):
+        pygame.event.clear()
         while True:
             self.screen.fill(BLACK)
             self.draw_center("SIGNAL LOST", 180, RED, True)

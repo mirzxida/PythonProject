@@ -9,6 +9,7 @@ from utils.storage import load, save
 from systems.events import Event
 from ui.hud import Hud
 from ui.game_over import GameOverScreen
+from systems.effects import Effects
 
 class Game:
     def __init__(self, screen, assets):
@@ -18,6 +19,8 @@ class Game:
         self.hull = 100
         self.hud = Hud(screen)
         self.game_over = GameOverScreen(screen)
+        self.bg_y = 0
+        self.shake = 0
 
         self.clock = pygame.time.Clock()
 
@@ -25,10 +28,18 @@ class Game:
         self.all_sprites = pygame.sprite.Group(self.player)
         self.asteroids = pygame.sprite.Group()
         self.events =Event()
+        self.effects = Effects()
 
         self.score = 0
         self.save_data = load()
         self.high_score = self.save_data.get("high_score", 0)
+
+    def _finish_run(self):
+        if self.score > self.high_score:
+            self.save_data["high_score"] = self.score
+            save(self.save_data)
+        return self.game_over.run(self.score)
+
     def spawn_asteroids(self, difficulty):
         for _ in range(5 * difficulty):
             a = Asteroid(self.assets["asteroid"])
@@ -56,23 +67,28 @@ class Game:
                 pygame.display.flip()
                 continue
             self.events.update()
+            self.effects.update()
             self.all_sprites.update()
             self.fuel -= 0.02
 
             if pygame.sprite.spritecollide(self.player, self.asteroids, False):
-                self.hull -= 20
-                if self.score > self.high_score:
-                    self.save_data["high_score"] = self.score
-                    save(self.save_data)
-                return
-            if self.hull <= 0 or self.fuel <= 0:
-                if self.score > self.high_score:
-                    self.save_data["high_score"] = self.score
-                    save(self.save_data)
-                result = self.game_over.run(self.score)
-                return result
+                self.effects.trigger()
+                overlay = pygame.Surface((WIDTH, HEIGHT))
+                overlay.fill(WHITE)
+                overlay.set_alpha(180)
+                self.screen.blit(overlay, (0, 0))
+                pygame.display.flip()
+                pygame.time.delay(150)
+                return self._finish_run()
 
-            self.screen.blit(self.assets["background"], (0, 0))
+            if self.hull <= 0 or self.fuel <= 0:
+                return self._finish_run()
+
+            self.bg_y += 0.5
+            if self.bg_y >= HEIGHT:
+                self.bg_y = 0
+            self.screen.blit(self.assets["background"], (0, self.bg_y - HEIGHT))
+            self.screen.blit(self.assets["background"], (0, self.bg_y))
             self.all_sprites.draw(self.screen)
             event_text = self.events.get_event()
             self.hud.render(self.score,
@@ -83,6 +99,20 @@ class Game:
                 font = pygame.font.SysFont(None, 28)
                 surface = font.render(str(event_text), True, WHITE)
                 self.screen.blit(surface, (20, 150))
+            offset_x = 0
+            offset_y = 0
 
+            if self.shake > 0:
+                import random
+                offset_x = random.randint(-3, 3)
+                offset_y = random.randint(-3, 3)
+                self.shake -= 1
+            if self.effects.flash:
+                overlay = pygame.Surface((WIDTH, HEIGHT))
+                overlay.set_alpha(120)
+                overlay.fill(WHITE)
+                self.screen.blit(overlay, (0, 0))
             pygame.display.flip()
             self.score += 1
+            for asteroid in self.asteroids:
+                asteroid.speed += 0.0005

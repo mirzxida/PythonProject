@@ -12,7 +12,7 @@ class Hud:
         pygame.draw.rect(self.screen, (50, 50, 50), (x, y, width, height))
         pygame.draw.rect(self.screen, color, (x, y, width * ratio, height))
     def draw_text(self, text, x, y, color = WHITE):
-        font = pygame.font.Font(None, 30)
+        font = self.font
         surface = font.render(text, True, color)
         self.screen.blit(surface, (x, y))
     def render(self, score, high_score, fuel, hull):

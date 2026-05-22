@@ -1,10 +1,12 @@
 import pygame
+import sys
 from settings import *
+from core.game import Game
 
 class Menu():
     def __init__(self, screen, game):
         self.screen = screen
-        self.game = game
+        self.assets = game.assets
         self.selected = 0
         self.options = ["Easy", "Medium", "Hard"]
 
@@ -32,7 +34,7 @@ class Menu():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit()
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
@@ -41,8 +43,8 @@ class Menu():
                         self.selected = (self.selected + 1) % 3
                     if event.key == pygame.K_RETURN:
                         while True:
-                            result = self.game.run(self.selected + 1)
+                            game = Game(self.screen, self.assets)
+                            result = game.run(self.selected + 1)
                             if result == "restart":
-                                self.game = type(self.game)(self.screen, self.game.assets)
                                 continue
                             break
