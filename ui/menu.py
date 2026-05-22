@@ -20,8 +20,8 @@ class Menu():
         while True:
             self.screen.fill(BLACK)
 
-            self.draw_text("Звёздные войны", 60, WIDTH // 2, 120)
-            self.draw_text("Бегство от астероидов", 40, WIDTH // 2, 180)
+            self.draw_text(GAME_TITLE, 60, WIDTH // 2, 120)
+            self.draw_text(VERSION, 40, WIDTH // 2, 180)
 
             for i, option in enumerate(self.options):
                 color = RED if i == self.selected else WHITE

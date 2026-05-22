@@ -10,6 +10,7 @@ from systems.events import Event
 from ui.hud import Hud
 from ui.game_over import GameOverScreen
 from systems.effects import Effects
+from entities.powerups import PowerUp
 
 class Game:
     def __init__(self, screen, assets):
@@ -21,6 +22,15 @@ class Game:
         self.game_over = GameOverScreen(screen)
         self.bg_y = 0
         self.shake = 0
+        self.powerups = pygame.sprite.Group()
+        self.power_timer = 0
+        pygame.mixer.init()
+        self.sounds = {"hit": pygame.mixer.Sound("assets/sounds/hit.mp3"),
+            "game_over": pygame.mixer.Sound("assets/sounds/game_over.mp3")}
+        self.sounds["hit"].set_volume(0.6)
+        self.sounds["game_over"].set_volume(1.0)
+        self.last_hit_time = 0
+        self.hit_lock = False
 
         self.clock = pygame.time.Clock()
 
@@ -38,6 +48,10 @@ class Game:
         if self.score > self.high_score:
             self.save_data["high_score"] = self.score
             save(self.save_data)
+            pygame.mixer.stop()
+            self.sounds["game_over"].play()
+            print("GAME OVER SOUND")
+            pygame.time.delay(400)
         return self.game_over.run(self.score)
 
     def spawn_asteroids(self, difficulty):
@@ -71,7 +85,29 @@ class Game:
             self.all_sprites.update()
             self.fuel -= 0.02
 
+            self.power_timer += 1
+
+            if self.power_timer >= 400:
+                self.power_timer = 0
+                power = PowerUp()
+                self.powerups.add(power)
+                self.all_sprites.add(power)
+
             if pygame.sprite.spritecollide(self.player, self.asteroids, False):
+                collisions = pygame.sprite.spritecollide(
+                    self.player,
+                    self.asteroids,
+                    False
+                )
+                if collisions:
+                    if not self.hit_lock:
+                        self.hit_lock = True
+                        self.sounds["hit"].play()
+                        self.hull =0
+                        if self.hull <= 0:
+                            return self._finish_run()
+                else:
+                    self.hit_lock = False
                 self.effects.trigger()
                 overlay = pygame.Surface((WIDTH, HEIGHT))
                 overlay.fill(WHITE)
@@ -79,7 +115,18 @@ class Game:
                 self.screen.blit(overlay, (0, 0))
                 pygame.display.flip()
                 pygame.time.delay(150)
-                return self._finish_run()
+                self.hull -= 20
+                if self.hull <= 0:
+                    return self._finish_run()
+            collected = pygame.sprite.spritecollide(self.player, self.powerups, True)
+            for p in collected:
+                if p.type == "fuel":
+                    self.fuel = min(100, self.fuel + 20)
+                elif p.type == "shield":
+                    self.hull = min(100, self.hull + 30)
+                elif p.type == "slow":
+                    for asteroid in self.asteroids:
+                        asteroid.speed *= 0.7
 
             if self.hull <= 0 or self.fuel <= 0:
                 return self._finish_run()

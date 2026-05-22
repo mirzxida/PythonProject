@@ -19,6 +19,7 @@ class GameOverScreen:
             self.screen.fill(BLACK)
             self.draw_center("SIGNAL LOST", 180, RED, True)
             self.draw_center(f"SCORE: {score}", 300)
+            self.draw_center("MISSION FAILED", 340)
             self.draw_center("ENTER - RESTART", 400)
             self.draw_center("ESC - MENU", 450)
             pygame.display.flip()
