@@ -23,7 +23,7 @@ Encapsulation: All game entities (Player, Asteroid, Effects, Event) encapsulate 
 Polymorphism: Various game objects implement standardized update() methods, which are called within the main game loop to change the state of entities on each frame.
 Installation Requirements: Python 3.10+ and pip. bash
 
-Clone the repository git clone https://github.com/wellkjz/FinalProject.git cd FinalProject
+Clone the repository git clone https://github.com/mirzxida/PythonProject/tree/master cd FinalProject
 Create a virtual environment python -m venv venv Windows: venv\Scripts\activate macOS / Linux: source venv/bin/activate
 Install dependencies pip install -r requirements.txt
 requirements.txt contents: pygame>=2.6.0
