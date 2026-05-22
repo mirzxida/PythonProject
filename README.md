@@ -28,15 +28,10 @@ Create a virtual environment python -m venv venv Windows: venv\Scripts\activate 
 Install dependencies pip install -r requirements.txt
 requirements.txt contents: pygame>=2.6.0
 
-
 How to Run bashpython main.py
 Controls KeyAction:
 Spacebar - start the game, ⬆/⬇ - select a level, ⮕/⬅ - control the spaceship, Enter - restart the game, ESC - open the menu
-Screenshots 
-Mine Menu
-In Game
-Gamay Over
 Team members:
 Kabdyrakmanova Aizat README file, UI design and screens, level generation
-Maratova Medina UI design and screens, save system
+Maratova Medina UI design and screens, data storage
 Merzabekova Khilolakhon game logic, UI design and screens, Testing, assets, entities
